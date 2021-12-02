@@ -23,7 +23,7 @@ OVERWRITE = False          # If you really need to download the whole thing agai
 date = "December 2021"              # Date automatically put in the code templates.
 starting_advent_of_code_year = 2021 # You can go as early as 2015.
 last_advent_of_code_year = 2021     # The setup will download all advent of code data up until that date included
-last_advent_of_code_day = 1         # If the year isn't finished, the setup will download days up until that day included for the last year
+last_advent_of_code_day = 26         # If the year isn't finished, the setup will download days up until that day included for the last year
 # Imports
 import os
 import datetime
@@ -111,7 +111,7 @@ for y in years:
             code = open(day_pos+"/code.py", "w+")
             code.write(template(year_pos, day_pos, author, date))
             code.close()
-            os.chmod(path=day_pos+"/code.py", mode=755)
+            os.chmod(path=day_pos+"/code.py", mode=0o775)
         if DOWNLOAD_INPUTS and (not os.path.exists(day_pos+"/input.txt") or OVERWRITE)and USER_SESSION_ID != "":
             done = False
             error_count = 0
@@ -163,6 +163,12 @@ for y in years:
                 except Exception as e:
                     print("        Non handled error while requesting statement from server. " + str(e))
                     done = True
+
+        if MAKE_SAMPLE:
+            print("        Making empty sample.txt, for the sample input.")
+            with open(day_pos+"/sample.txt", 'a'):
+                os.utime(day_pos+"/sample.txt", None)
+
         if MAKE_URL and (not os.path.exists(day_pos+"/link.url") or OVERWRITE):
             url = open(day_pos+"/link.url", "w+")
             url.write("[InternetShortcut]\nURL="+link+str(y)+"/day/"+str(d)+"\n")
