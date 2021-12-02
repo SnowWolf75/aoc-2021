@@ -13,6 +13,7 @@ DOWNLOAD_STATEMENTS = True # Set to false to not download statements. Note that 
 DOWNLOAD_INPUTS = True     # Set to false to not download inputs. Note that if the USER_SESSION_ID is wrong or left empty, inputs will not be downloaded.
 MAKE_CODE_TEMPLATE = True  # Set to false to not make code templates. Note that even if OVERWRITE is set to True, it will never overwrite codes.
 MAKE_URL = True            # Set to false to not create a direct url link in the folder.
+MAKE_SAMPLE = True         # Create an empty file for adding sample data
 ADD_GIT = True             # Add the directory to the git repo
 ADD_SVN = False            # Add the directory to the svn repo
 author = "Snow Wolf"       # Name automatically put in the code templates.
@@ -49,6 +50,50 @@ days = range(1,26)
 link = "https://adventofcode.com/" # ex use : https://adventofcode.com/2017/day/19/input
 USER_AGENT = "adventofcode_working_directories_creator"
 
+def template(_year, _day, _author, _date):
+    my_template = """#!/usr/bin/env python3
+import argparse
+# Advent of code Year {y} Day {da} solution
+# Author = {a}
+# Date = {dt}
+
+parser = argparse.ArgumentParser(description='Add branching arguments for code.')
+parser.add_argument('-s', '--sample', action="store_true", help="Use sample input")
+parser.add_argument('-1', '--one', action="store_true", help="Execute first part")
+parser.add_argument('-2', '--two', action="store_true", help="Execute second part")
+args = parser.parse_args()
+
+if not (args.one | args.two):
+    args.one = True
+    args.two = True
+    
+if args.sample:
+    input_source = __file__.rstrip("code.py")+"sample.txt"
+else:
+    input_source = __file__.rstrip("code.py")+"input.txt"
+
+with open(input_source, 'r') as input_file:
+    input = input_file.read()
+
+def part1(lines):
+    pass
+
+
+def part2(lines):
+    pass
+
+
+if args.one:
+    one_ret = part1(input.splitlines())
+    print("%sPart One : %s" % ("SAMPLE! " if args.sample else "", str(one_ret)))
+
+if args.two:
+    two_ret = part2(input.splitlines())
+    print("%sPart Two : %s" % ("SAMPLE! " if args.sample else "", str(two_ret)))
+    """
+    return my_template.format(a=_author, da=_day, dt=_date, y=_year)
+
+
 print("Setup will download data and create working directories and files for adventofcode.")
 if not os.path.exists(base_pos):
     os.mkdir(base_pos)
@@ -64,13 +109,13 @@ for y in years:
         day_pos = year_pos+"/"+str(d)
         if MAKE_CODE_TEMPLATE and not os.path.exists(day_pos+"/code.py"):
             code = open(day_pos+"/code.py", "w+")
-            code.write("#!/usr/bin/env python3\n# Advent of code Year "+str(y)+" Day "+str(d)+" solution\n# Author = "+author+"\n# Date = "+date+"\n\nwith open((__file__.rstrip(\"code.py\")+\"input.txt\"), 'r') as input_file:\n    input = input_file.read()\n\n\n\nprint(\"Part One : \"+ str(None))\n\n\n\nprint(\"Part Two : \"+ str(None))")
+            code.write(template(year_pos, day_pos, author, date))
             code.close()
             os.chmod(path=day_pos+"/code.py", mode=755)
         if DOWNLOAD_INPUTS and (not os.path.exists(day_pos+"/input.txt") or OVERWRITE)and USER_SESSION_ID != "":
             done = False
             error_count = 0
-            while(not done):
+            while not done:
                 try:
                     with requests.get(url=link+str(y)+"/day/"+str(d)+"/input", cookies={"session": USER_SESSION_ID}, headers={"User-Agent": USER_AGENT}) as response:
                         if response.ok:
