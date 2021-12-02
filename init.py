@@ -7,12 +7,14 @@
 # From https://github.com/AlexeSimon/adventofcode
 
 # USER SPECIFIC PARAMETERS
-base_pos = "./"            # Folders will be created here. If you want to make a parent folder, change this to ex "./adventofcode/"
+base_pos = "/Users/charles.wheeler/mygit/aoc-2021/"            # Folders will be created here. If you want to make a parent folder, change this to ex "./adventofcode/"
 USER_SESSION_ID = "53616c7465645f5f3994efd05285873007778376dfa504c649ef8eaad59ab3879a3e3c691ee826546b02781784b534ee"       # Get your session by inspecting the session cookie content in your web browser while connected to adventofcode and paste it here as plain text in between the ". Leave at is to not download inputs.
 DOWNLOAD_STATEMENTS = True # Set to false to not download statements. Note that only part one is downloaded (since you need to complete it to access part two)
 DOWNLOAD_INPUTS = True     # Set to false to not download inputs. Note that if the USER_SESSION_ID is wrong or left empty, inputs will not be downloaded.
 MAKE_CODE_TEMPLATE = True  # Set to false to not make code templates. Note that even if OVERWRITE is set to True, it will never overwrite codes.
 MAKE_URL = True            # Set to false to not create a direct url link in the folder.
+ADD_GIT = True             # Add the directory to the git repo
+ADD_SVN = False            # Add the directory to the svn repo
 author = "Snow Wolf"       # Name automatically put in the code templates.
 OVERWRITE = False          # If you really need to download the whole thing again, set this to true. As the creator said, AoC is fragile; please be gentle. Statements and Inputs do not change. This will not overwrite codes.
 
@@ -27,7 +29,18 @@ import datetime
 try:
     import requests
 except ImportError:
-    sys.exit("You need requests module. Install it by running pip install requests.")
+    sys.exit("You need requests module. Install it by running \"pip install requests\".")
+
+if ADD_SVN:
+    try:
+        import svn
+    except ImportError:
+        sys.exit("You need SVN module. Install it by running \"pip install svn\".")
+if ADD_GIT:
+    try:
+        from git import Repo
+    except ImportError:
+        sys.exit("You need GIT module. Install it by running \"pip install gitpython\".")
 
 # Code
 MAX_RECONNECT_ATTEMPT = 2
@@ -51,8 +64,9 @@ for y in years:
         day_pos = year_pos+"/"+str(d)
         if MAKE_CODE_TEMPLATE and not os.path.exists(day_pos+"/code.py"):
             code = open(day_pos+"/code.py", "w+")
-            code.write("# Advent of code Year "+str(y)+" Day "+str(d)+" solution\n# Author = "+author+"\n# Date = "+date+"\n\nwith open((__file__.rstrip(\"code.py\")+\"input.txt\"), 'r') as input_file:\n    input = input_file.read()\n\n\n\nprint(\"Part One : \"+ str(None))\n\n\n\nprint(\"Part Two : \"+ str(None))")
+            code.write("#!/usr/bin/env python3\n# Advent of code Year "+str(y)+" Day "+str(d)+" solution\n# Author = "+author+"\n# Date = "+date+"\n\nwith open((__file__.rstrip(\"code.py\")+\"input.txt\"), 'r') as input_file:\n    input = input_file.read()\n\n\n\nprint(\"Part One : \"+ str(None))\n\n\n\nprint(\"Part Two : \"+ str(None))")
             code.close()
+            os.chmod(path=day_pos+"/code.py", mode=755)
         if DOWNLOAD_INPUTS and (not os.path.exists(day_pos+"/input.txt") or OVERWRITE)and USER_SESSION_ID != "":
             done = False
             error_count = 0
@@ -108,5 +122,11 @@ for y in years:
             url = open(day_pos+"/link.url", "w+")
             url.write("[InternetShortcut]\nURL="+link+str(y)+"/day/"+str(d)+"\n")
             url.close()
+
+        if ADD_GIT:
+            print("        Adding directory to GIT")
+            repo = Repo(base_pos)
+            repo.git.add([day_pos])
+
 print("Setup complete : adventofcode working directories and files initialized with success.")
 
