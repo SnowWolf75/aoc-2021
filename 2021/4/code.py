@@ -32,13 +32,17 @@ class BingoOne:
         self.boards = []
         self.winner = None
         self.last_call = 0
+        self.winner_list = {}
 
     class Board:
         def __init__(self, data, id):
             self.id = id
             self.board_cells = numpy.array([], dtype='i1')
+            self.final_board = numpy.ones([5,5], dtype='i1')
             self.last_call = 0
             self.win_axis = [-1, -1]
+            self.is_winner = False
+            self.winning_val = 0
             for line in data:
                 self.board_cells = numpy.append(self.board_cells,
                                                 [int(i) for i in line.split()])
@@ -56,24 +60,35 @@ class BingoOne:
                 return None
 
         def check_win(self, last_call):
+            if self.is_winner:
+                # Already checked for winning condition, so pop out
+                return False
+
             for row in range(5):
                 if self.called[row].max() == 0:
-                    self.win_axis = [row, -1]
+                    self.is_winner = True
                     self.last_call = last_call
+                    self.claim_winner()
                     return True
 
             for col in range(5):
                 if self.called[:,col].max() == 0:
-                    self.win_axis = [-1, col]
+                    self.is_winner = True
                     self.last_call = last_call
+                    self.claim_winner()
                     return True
 
             return False
 
         def claim_winner(self):
-            r = self.board_cells * self.called
-            s = r.sum() * self.last_call
-            return s
+            self.final_board = self.board_cells * self.called
+            s = self.final_board.sum() * self.last_call
+            self.winning_val = s
+
+        def print_win(self):
+            print("Board ID: %d \tWinning val: %d\tLC: %d" % (self.id, self.winning_val, self.last_call))
+            print(np.hstack((self.board_cells, self.called)))
+            print()
 
     def add(self, data, board_id):
         b = self.Board(data, board_id)
@@ -93,40 +108,47 @@ class BingoOne:
         for board in self.boards:
             did_win = board.check_win(last_call=val)
             if did_win:
-                self.winner = board
-                self.last_call = val
-                print("Winner!")
-                break
+                board.print_win()
+                return True
 
-        if self.winner:
-            ret = self.parse_winner(board)
-            return ret
-        else:
-            return 0
+        return False
+
+    def show_winners(self):
+        f = " {:^5} | {}"
+        print()
+        print(f.format("Board", "Winning val"))
+        for k in self.winner_list:
+            print(f.format(k, self.winner_list[k]))
+
 
     def parse_winner(self, b):
         return b.claim_winner()
 
     def iterate(self):
-        f = "{:>4} | {}"
-        print(" Num | Boards")
-        print("-----+-----------------------------")
+        # f = "{:>4} | {}"
+        # print(" Num | Boards")
+        # print("-----+-----------------------------")
         for i in self.called_numbers:
             boards_marked = self.call(i)
-            if boards_marked:
-                s = ", ".join(map(str, boards_marked))
-            else:
-                s = "None"
+            # if boards_marked:
+            #     s = ", ".join(map(str, boards_marked))
+            # else:
+            #     s = "None"
+            #
+            # print(f.format(i, s), end='')
 
-            print(f.format(i, s))
             win_val = self.check_winner(i)
-            if win_val > 0:
-                return win_val
-
-        return ""
+            # if win_val:
+            #     print(" New winner")
+            # else:
+            #     print("")
 
 
 def part1(lines):
+    return "28082"
+
+
+def part2(lines):
     first_line = lines.pop(0)
     print("FL: ", first_line)
     squid = BingoOne(first_line)
@@ -138,12 +160,9 @@ def part1(lines):
         del(lines[0:5])
         i += 1
 
-    print("Num boards:",len(squid.boards))
-    rv = squid.iterate()
-    return str(rv)
-
-
-def part2(lines):
+    print("Num boards:", len(squid.boards))
+    squid.iterate()
+    # squid.show_winners()
     return ""
 
 
