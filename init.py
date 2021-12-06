@@ -76,11 +76,11 @@ with open(input_source, 'r') as input_file:
     input = input_file.read()
 
 def part1(lines):
-    pass
+    return ""
 
 
 def part2(lines):
-    pass
+    return ""
 
 
 if args.one:
