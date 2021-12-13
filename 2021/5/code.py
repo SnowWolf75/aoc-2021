@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import argparse
+import re
+import numpy as np
 # Advent of code Year /Users/charles.wheeler/mygit/aoc-2021/2021 Day /Users/charles.wheeler/mygit/aoc-2021/2021/5 solution
 # Author = Snow Wolf
 # Date = December 2021
@@ -20,15 +22,31 @@ else:
     input_source = __file__.rstrip("code.py")+"input.txt"
 
 with open(input_source, 'r') as input_file:
-    input = input_file.read()
+    input_lines = input_file.read().splitlines()
+    coords = [re.match(r'([0-9]+),([0-9]+) -> ([0-9]+),([0-9]+)', l).groups() for l in input_lines]
+    pairs = [{'a': a, 'b': b, 'c': c, 'd': d} for a, b, c, d in coords]
+
+class Vents:
+    def __init__(self, data):
+        self.data = data
+        self.board = np.array(dtype='i1')
+        for d in self.data:
+            
+
+
+def common_setup():
+    pass
+
 
 def part1(lines):
-    pass
+    return ""
 
 
 def part2(lines):
-    pass
+    return ""
 
+
+common_setup()
 
 if args.one:
     one_ret = part1(input.splitlines())

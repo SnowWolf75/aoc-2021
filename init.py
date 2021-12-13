@@ -75,6 +75,11 @@ else:
 with open(input_source, 'r') as input_file:
     input = input_file.read()
 
+
+def common_setup:
+    pass
+    
+    
 def part1(lines):
     return ""
 
@@ -82,6 +87,8 @@ def part1(lines):
 def part2(lines):
     return ""
 
+
+common_setup()
 
 if args.one:
     one_ret = part1(input.splitlines())
