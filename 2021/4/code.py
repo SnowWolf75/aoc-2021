@@ -105,13 +105,16 @@ class BingoOne:
         return called_on_id
 
     def check_winner(self, val):
+        did_win = False
         for board in self.boards:
             did_win = board.check_win(last_call=val)
             if did_win:
                 board.print_win()
-                return True
 
-        return False
+        if did_win:
+            return True
+        else:
+            return False
 
     def show_winners(self):
         f = " {:^5} | {}"
